@@ -1,18 +1,18 @@
-import React from 'react';
-import { View, Text, Pressable, StyleSheet, Dimensions } from 'react-native';
-import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
-import type { Href } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { AppColors, Spacing, Radius, FontSize } from '@/constants/appTheme';
-import { Handbag } from '@/types/handbag';
-import FavoriteButton from '@/components/FavoriteButton';
+import React from "react";
+import { View, Text, Pressable, StyleSheet, Dimensions } from "react-native";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import type { Href } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { AppColors, Spacing, Radius, FontSize } from "@/constants/appTheme";
+import { Handbag } from "@/types/handbag";
+import FavoriteButton from "@/components/FavoriteButton";
 
 interface Props {
   handbag: Handbag;
 }
 
-const CARD_WIDTH = (Dimensions.get('window').width - Spacing.lg * 3) / 2;
+const CARD_WIDTH = (Dimensions.get("window").width - Spacing.lg * 3) / 2;
 
 export default function HandbagCard({ handbag }: Props) {
   const router = useRouter();
@@ -47,7 +47,9 @@ export default function HandbagCard({ handbag }: Props) {
         {/* Brand */}
         <Text style={styles.brand}>{handbag.brand}</Text>
         {/* Name */}
-        <Text style={styles.name} numberOfLines={2}>{handbag.handbagName}</Text>
+        <Text style={styles.name} numberOfLines={2}>
+          {handbag.handbagName}
+        </Text>
 
         {/* Price row */}
         <View style={styles.priceRow}>
@@ -59,12 +61,17 @@ export default function HandbagCard({ handbag }: Props) {
         <View style={styles.tagRow}>
           <View style={styles.genderTag}>
             <Ionicons
-              name={handbag.gender ? 'male' : 'female'}
+              name={handbag.gender ? "male" : "female"}
               size={12}
               color={handbag.gender ? AppColors.male : AppColors.female}
             />
-            <Text style={[styles.genderText, { color: handbag.gender ? AppColors.male : AppColors.female }]}>
-              {handbag.gender ? 'Male' : 'Female'}
+            <Text
+              style={[
+                styles.genderText,
+                { color: handbag.gender ? AppColors.male : AppColors.female },
+              ]}
+            >
+              {handbag.gender ? "Male" : "Female"}
             </Text>
           </View>
           <View style={styles.categoryTag}>
@@ -84,7 +91,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: AppColors.cardBorder,
     marginBottom: Spacing.lg,
-    overflow: 'hidden',
+    overflow: "hidden",
     shadowColor: AppColors.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
@@ -96,17 +103,17 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.97 }],
   },
   imageWrapper: {
-    width: '100%',
+    width: "100%",
     aspectRatio: 1,
-    position: 'relative',
-    backgroundColor: '#0D0D1A',
+    position: "relative",
+    backgroundColor: "#0D0D1A",
   },
   image: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   pctBadge: {
-    position: 'absolute',
+    position: "absolute",
     top: Spacing.sm,
     left: Spacing.sm,
     backgroundColor: AppColors.accent,
@@ -117,13 +124,13 @@ const styles = StyleSheet.create({
   pctText: {
     color: AppColors.white,
     fontSize: FontSize.xs,
-    fontWeight: '800',
+    fontWeight: "800",
   },
   heartWrapper: {
-    position: 'absolute',
+    position: "absolute",
     top: Spacing.xs,
     right: Spacing.xs,
-    backgroundColor: 'rgba(15,15,26,0.75)',
+    backgroundColor: "rgba(15,15,26,0.75)",
     borderRadius: Radius.full,
   },
   info: {
@@ -133,50 +140,50 @@ const styles = StyleSheet.create({
   brand: {
     fontSize: FontSize.xs,
     color: AppColors.accent,
-    fontWeight: '700',
-    textTransform: 'uppercase',
+    fontWeight: "700",
+    textTransform: "uppercase",
     letterSpacing: 0.8,
   },
   name: {
     fontSize: FontSize.sm,
     color: AppColors.textPrimary,
-    fontWeight: '600',
+    fontWeight: "600",
     lineHeight: 18,
   },
   priceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
     marginTop: 2,
   },
   price: {
     fontSize: FontSize.sm,
-    fontWeight: '800',
+    fontWeight: "800",
     color: AppColors.textPrimary,
   },
   originalPrice: {
     fontSize: FontSize.xs,
     color: AppColors.textMuted,
-    textDecorationLine: 'line-through',
+    textDecorationLine: "line-through",
   },
   tagRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 4,
-    flexWrap: 'wrap',
+    flexWrap: "wrap",
     marginTop: 4,
   },
   genderTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 3,
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: "rgba(255,255,255,0.06)",
     borderRadius: Radius.full,
     paddingHorizontal: 7,
     paddingVertical: 3,
   },
   genderText: {
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   categoryTag: {
     backgroundColor: AppColors.tagBackground,
@@ -187,6 +194,6 @@ const styles = StyleSheet.create({
   categoryText: {
     fontSize: 10,
     color: AppColors.tagText,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

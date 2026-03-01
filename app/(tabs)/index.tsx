@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,18 +8,18 @@ import {
   ActivityIndicator,
   RefreshControl,
   StatusBar,
-} from 'react-native';
-import { fetchHandbags } from '@/services/api';
-import { Handbag } from '@/types/handbag';
-import HandbagCard from '@/components/HandbagCard';
-import BrandFilter from '@/components/BrandFilter';
-import { AppColors, Spacing, FontSize } from '@/constants/appTheme';
+} from "react-native";
+import { fetchHandbags } from "@/services/api";
+import { Handbag } from "@/types/handbag";
+import HandbagCard from "@/components/HandbagCard";
+import BrandFilter from "@/components/BrandFilter";
+import { AppColors, Spacing, FontSize } from "@/constants/appTheme";
 
 export default function HomeScreen() {
   const [handbags, setHandbags] = useState<Handbag[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedBrand, setSelectedBrand] = useState('All');
+  const [selectedBrand, setSelectedBrand] = useState("All");
   const [error, setError] = useState<string | null>(null);
 
   const loadHandbags = useCallback(async () => {
@@ -30,7 +30,7 @@ export default function HomeScreen() {
       const sorted = [...data].sort((a, b) => b.cost - a.cost);
       setHandbags(sorted);
     } catch (e) {
-      setError('Failed to load handbags. Please check your connection.');
+      setError("Failed to load handbags. Please check your connection.");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -42,24 +42,29 @@ export default function HomeScreen() {
   }, [loadHandbags]);
 
   const filtered = useMemo(() => {
-    if (selectedBrand === 'All') return handbags;
-    return handbags.filter(h => h.brand === selectedBrand);
+    if (selectedBrand === "All") return handbags;
+    return handbags.filter((h) => h.brand === selectedBrand);
   }, [handbags, selectedBrand]);
 
-  const renderItem = useCallback(({ item }: { item: Handbag }) => (
-    <HandbagCard handbag={item} />
-  ), []);
+  const renderItem = useCallback(
+    ({ item }: { item: Handbag }) => <HandbagCard handbag={item} />,
+    [],
+  );
 
   const keyExtractor = useCallback((item: Handbag) => item.id, []);
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="light-content" backgroundColor={AppColors.background} />
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={AppColors.background}
+      />
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Luxury Bags</Text>
         <Text style={styles.subtitle}>
-          {filtered.length} {selectedBrand !== 'All' ? selectedBrand : ''} {filtered.length === 1 ? 'item' : 'items'}
+          {filtered.length} {selectedBrand !== "All" ? selectedBrand : ""}{" "}
+          {filtered.length === 1 ? "item" : "items"}
         </Text>
       </View>
 
@@ -89,14 +94,19 @@ export default function HomeScreen() {
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
-              onRefresh={() => { setRefreshing(true); loadHandbags(); }}
+              onRefresh={() => {
+                setRefreshing(true);
+                loadHandbags();
+              }}
               tintColor={AppColors.accent}
             />
           }
           ListEmptyComponent={
             <View style={styles.center}>
               <Text style={styles.errorEmoji}>🛍</Text>
-              <Text style={styles.errorText}>No bags found for {selectedBrand}</Text>
+              <Text style={styles.errorText}>
+                No bags found for {selectedBrand}
+              </Text>
             </View>
           }
         />
@@ -117,7 +127,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: FontSize.hero,
-    fontWeight: '900',
+    fontWeight: "900",
     color: AppColors.textPrimary,
     letterSpacing: -0.5,
   },
@@ -132,12 +142,12 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.sm,
   },
   row: {
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
   },
   center: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     padding: Spacing.xxl,
     gap: Spacing.md,
   },
@@ -152,6 +162,6 @@ const styles = StyleSheet.create({
   errorText: {
     color: AppColors.textSecondary,
     fontSize: FontSize.md,
-    textAlign: 'center',
+    textAlign: "center",
   },
 });

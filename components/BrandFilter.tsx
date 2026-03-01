@@ -1,8 +1,15 @@
-import React from 'react';
-import { ScrollView, Pressable, Text, StyleSheet } from 'react-native';
-import { AppColors, Radius, FontSize, Spacing } from '@/constants/appTheme';
+import React from "react";
+import { ScrollView, Pressable, Text, StyleSheet } from "react-native";
+import { AppColors, Radius, FontSize, Spacing } from "@/constants/appTheme";
 
-const BRANDS = ['All', 'Bvlgari', 'Michael Kors', 'Burberry', 'Ferragamo', 'Fendi'];
+const BRANDS = [
+  "All",
+  "Bvlgari",
+  "Michael Kors",
+  "Burberry",
+  "Ferragamo",
+  "Fendi",
+];
 
 interface Props {
   selected: string;
@@ -16,7 +23,7 @@ export default function BrandFilter({ selected, onSelect }: Props) {
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.container}
     >
-      {BRANDS.map(brand => {
+      {BRANDS.map((brand) => {
         const active = selected === brand;
         return (
           <Pressable
@@ -39,6 +46,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     gap: Spacing.sm,
     paddingVertical: Spacing.sm,
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
   },
   chip: {
     paddingHorizontal: Spacing.md,
@@ -55,7 +65,7 @@ const styles = StyleSheet.create({
   chipText: {
     fontSize: FontSize.sm,
     color: AppColors.chipTextInactive,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   chipTextActive: {
     color: AppColors.chipTextActive,

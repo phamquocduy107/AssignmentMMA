@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { AppColors, FontSize, Spacing, Radius } from '@/constants/appTheme';
-import { Feedback } from '@/types/handbag';
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { AppColors, FontSize, Spacing, Radius } from "@/constants/appTheme";
+import { Feedback } from "@/types/handbag";
 
 interface Props {
   feedback: Feedback;
@@ -41,18 +41,18 @@ export default function RatingBreakdown({ feedback }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 16,
     marginVertical: Spacing.md,
   },
   avgBlock: {
-    alignItems: 'center',
+    alignItems: "center",
     minWidth: 70,
   },
   avgNumber: {
     fontSize: 36,
-    fontWeight: '800',
+    fontWeight: "800",
     color: AppColors.textPrimary,
     lineHeight: 40,
   },
@@ -70,8 +70,8 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   barRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
   barLabel: {
@@ -84,8 +84,8 @@ const styles = StyleSheet.create({
     height: 7,
     borderRadius: Radius.full,
     backgroundColor: AppColors.starEmpty,
-    flexDirection: 'row',
-    overflow: 'hidden',
+    flexDirection: "row",
+    overflow: "hidden",
   },
   barFill: {
     backgroundColor: AppColors.star,
@@ -95,6 +95,6 @@ const styles = StyleSheet.create({
     fontSize: FontSize.xs,
     color: AppColors.textMuted,
     width: 20,
-    textAlign: 'right',
+    textAlign: "right",
   },
 });
