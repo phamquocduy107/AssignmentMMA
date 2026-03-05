@@ -1,25 +1,117 @@
-import React, { useState, useMemo, useCallback } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  Pressable,
-  StyleSheet,
-  SafeAreaView,
-  Alert,
-  StatusBar,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import type { Href } from "expo-router";
+import { AppColors, FontSize, Radius, Spacing } from "@/constants/appTheme";
 import { useFavorites } from "@/context/FavoritesContext";
 import { Handbag } from "@/types/handbag";
+import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { AppColors, Spacing, FontSize, Radius } from "@/constants/appTheme";
-import FavoriteButton from "@/components/FavoriteButton";
+import type { Href } from "expo-router";
+import { useRouter } from "expo-router";
+import React, { useCallback, useRef } from "react";
+import {
+  Alert,
+  Animated,
+  FlatList,
+  Pressable,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import {
+  GestureHandlerRootView,
+  Swipeable,
+} from "react-native-gesture-handler";
 
+// ── Swipeable row ────────────────────────────────────────────────────────────
+function FavoriteRow({
+  item,
+  onDelete,
+  onPress,
+}: {
+  item: Handbag;
+  onDelete: () => void;
+  onPress: () => void;
+}) {
+  const swipeRef = useRef<Swipeable>(null);
+  const discounted = item.cost * (1 - item.percentOff);
+
+  const renderRightActions = (
+    _progress: Animated.AnimatedInterpolation<number>,
+    dragX: Animated.AnimatedInterpolation<number>,
+  ) => {
+    const scale = dragX.interpolate({
+      inputRange: [-80, 0],
+      outputRange: [1, 0.7],
+      extrapolate: "clamp",
+    });
+
+    return (
+      <TouchableOpacity
+        style={styles.deleteAction}
+        onPress={() => {
+          swipeRef.current?.close();
+          onDelete();
+        }}
+        activeOpacity={0.8}
+      >
+        <Animated.View style={[styles.deleteInner, { transform: [{ scale }] }]}>
+          <Ionicons name="trash" size={22} color={AppColors.white} />
+          <Text style={styles.deleteText}>Xóa</Text>
+        </Animated.View>
+      </TouchableOpacity>
+    );
+  };
+
+  return (
+    <Swipeable
+      ref={swipeRef}
+      renderRightActions={renderRightActions}
+      rightThreshold={40}
+      overshootRight={false}
+      friction={2}
+      containerStyle={styles.swipeContainer}
+    >
+      <Pressable
+        style={({ pressed }) => [styles.item, pressed && { opacity: 0.8 }]}
+        onPress={onPress}
+      >
+        <Image
+          source={{ uri: item.uri }}
+          style={styles.img}
+          contentFit="cover"
+          transition={200}
+        />
+        <View style={styles.itemInfo}>
+          <Text style={styles.itemBrand}>{item.brand}</Text>
+          <Text style={styles.itemName} numberOfLines={2}>
+            {item.handbagName}
+          </Text>
+          <View style={styles.priceRow}>
+            <Text style={styles.itemPrice}>${discounted.toFixed(2)}</Text>
+            <Text style={styles.itemOriginal}>${item.cost.toFixed(2)}</Text>
+          </View>
+          <View style={styles.pctBadge}>
+            <Text style={styles.pctText}>
+              {Math.round(item.percentOff * 100)}% OFF
+            </Text>
+          </View>
+        </View>
+        {/* Swipe hint icon */}
+        <Ionicons
+          name="chevron-back"
+          size={16}
+          color={AppColors.textMuted}
+          style={styles.swipeHint}
+        />
+      </Pressable>
+    </Swipeable>
+  );
+}
+
+// ── Main Screen ───────────────────────────────────────────────────────────────
 export default function FavoritesScreen() {
-  const { favorites, clearFavorites } = useFavorites();
+  const { favorites, removeFavorite, clearFavorites } = useFavorites();
   const router = useRouter();
 
   const handleClearAll = () => {
@@ -35,87 +127,69 @@ export default function FavoritesScreen() {
   };
 
   const renderItem = useCallback(
-    ({ item }: { item: Handbag }) => {
-      const discounted = item.cost * (1 - item.percentOff);
-      return (
-        <Pressable
-          style={({ pressed }) => [styles.item, pressed && { opacity: 0.8 }]}
-          onPress={() => router.push(`/detail/${item.id}` as Href)}
-        >
-          <Image
-            source={{ uri: item.uri }}
-            style={styles.img}
-            contentFit="cover"
-            transition={200}
-          />
-          <View style={styles.itemInfo}>
-            <Text style={styles.itemBrand}>{item.brand}</Text>
-            <Text style={styles.itemName} numberOfLines={2}>
-              {item.handbagName}
-            </Text>
-            <View style={styles.priceRow}>
-              <Text style={styles.itemPrice}>${discounted.toFixed(2)}</Text>
-              <Text style={styles.itemOriginal}>${item.cost.toFixed(2)}</Text>
-            </View>
-            <View style={styles.pctBadge}>
-              <Text style={styles.pctText}>
-                {Math.round(item.percentOff * 100)}% OFF
-              </Text>
-            </View>
-          </View>
-          {/* Remove button */}
-          <View style={styles.removeBtn}>
-            <FavoriteButton handbag={item} size={22} />
-          </View>
-        </Pressable>
-      );
-    },
-    [router],
+    ({ item }: { item: Handbag }) => (
+      <FavoriteRow
+        item={item}
+        onDelete={() => removeFavorite(item.id)}
+        onPress={() => router.push(`/detail/${item.id}` as Href)}
+      />
+    ),
+    [router, removeFavorite],
   );
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor={AppColors.background}
-      />
-      {/* Header */}
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.title}>Favorites</Text>
-          <Text style={styles.subtitle}>
-            {favorites.length} saved {favorites.length === 1 ? "item" : "items"}
-          </Text>
-        </View>
-        {favorites.length > 0 && (
-          <Pressable onPress={handleClearAll} style={styles.clearBtn}>
-            <Ionicons name="trash-outline" size={16} color={AppColors.danger} />
-            <Text style={styles.clearText}>Clear All</Text>
-          </Pressable>
-        )}
-      </View>
-
-      {favorites.length === 0 ? (
-        <View style={styles.empty}>
-          <Text style={styles.emptyEmoji}>🤍</Text>
-          <Text style={styles.emptyTitle}>No Favorites Yet</Text>
-          <Text style={styles.emptySubtitle}>
-            Tap the heart on any bag to save it here
-          </Text>
-          <Pressable style={styles.browseBtn} onPress={() => router.push("/")}>
-            <Text style={styles.browseBtnText}>Browse Bags</Text>
-          </Pressable>
-        </View>
-      ) : (
-        <FlatList
-          data={favorites}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaView style={styles.safe}>
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor={AppColors.background}
         />
-      )}
-    </SafeAreaView>
+        {/* Header */}
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.title}>Favorites</Text>
+            <Text style={styles.subtitle}>
+              {favorites.length} saved{" "}
+              {favorites.length === 1 ? "item" : "items"}
+            </Text>
+          </View>
+          {favorites.length > 0 && (
+            <Pressable onPress={handleClearAll} style={styles.clearBtn}>
+              <Ionicons
+                name="trash-outline"
+                size={16}
+                color={AppColors.danger}
+              />
+              <Text style={styles.clearText}>Clear All</Text>
+            </Pressable>
+          )}
+        </View>
+
+        {favorites.length === 0 ? (
+          <View style={styles.empty}>
+            <Text style={styles.emptyEmoji}>🤍</Text>
+            <Text style={styles.emptyTitle}>No Favorites Yet</Text>
+            <Text style={styles.emptySubtitle}>
+              Tap the heart on any bag to save it here
+            </Text>
+            <Pressable
+              style={styles.browseBtn}
+              onPress={() => router.push("/")}
+            >
+              <Text style={styles.browseBtnText}>Browse Bags</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <FlatList
+            data={favorites}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.list}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }
 
@@ -157,14 +231,17 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   list: { paddingHorizontal: Spacing.lg, paddingBottom: Spacing.xxl },
+  // Swipeable
+  swipeContainer: {
+    marginBottom: Spacing.md,
+    borderRadius: Radius.lg,
+    overflow: "hidden",
+  },
   item: {
     flexDirection: "row",
     backgroundColor: AppColors.card,
-    borderRadius: Radius.lg,
     borderWidth: 1,
     borderColor: AppColors.cardBorder,
-    marginBottom: Spacing.md,
-    overflow: "hidden",
     alignItems: "center",
   },
   img: { width: 90, height: 90 },
@@ -207,7 +284,24 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   pctText: { fontSize: 10, color: AppColors.accent, fontWeight: "700" },
-  removeBtn: { paddingRight: Spacing.md },
+  swipeHint: { paddingRight: Spacing.md },
+  // Delete action
+  deleteAction: {
+    backgroundColor: AppColors.danger,
+    justifyContent: "center",
+    alignItems: "center",
+    width: 80,
+  },
+  deleteInner: {
+    alignItems: "center",
+    gap: 4,
+  },
+  deleteText: {
+    color: AppColors.white,
+    fontSize: FontSize.xs,
+    fontWeight: "700",
+  },
+  // Empty state
   empty: {
     flex: 1,
     alignItems: "center",
