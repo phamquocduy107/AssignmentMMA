@@ -1,11 +1,66 @@
+import { AppColors, Spacing } from "@/constants/appTheme";
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { AppColors, FontSize, Spacing } from "@/constants/appTheme";
+import { StyleSheet, Text, View } from "react-native";
 
 interface Props {
   rating: number; // e.g. 4.5
   size?: number;
   showLabel?: boolean;
+}
+
+function Star({
+  filled,
+  half,
+  size,
+}: {
+  filled: boolean;
+  half: boolean;
+  size: number;
+}) {
+  if (filled) {
+    return (
+      <Text style={[styles.star, { fontSize: size, color: AppColors.star }]}>
+        ★
+      </Text>
+    );
+  }
+  if (half) {
+    // Overlay: empty star ở dưới, half star vàng clip 50% ở trên
+    return (
+      <View
+        style={{ width: size * 0.9, height: size, justifyContent: "center" }}
+      >
+        {/* Nền xám */}
+        <Text
+          style={[
+            styles.star,
+            {
+              fontSize: size,
+              color: AppColors.starEmpty,
+              position: "absolute",
+            },
+          ]}
+        >
+          ★
+        </Text>
+        {/* Nửa vàng, clip bằng overflow hidden + width 50% */}
+        <View
+          style={{ width: "50%", overflow: "hidden", position: "absolute" }}
+        >
+          <Text
+            style={[styles.star, { fontSize: size, color: AppColors.star }]}
+          >
+            ★
+          </Text>
+        </View>
+      </View>
+    );
+  }
+  return (
+    <Text style={[styles.star, { fontSize: size, color: AppColors.starEmpty }]}>
+      ★
+    </Text>
+  );
 }
 
 export default function StarRating({
@@ -19,11 +74,7 @@ export default function StarRating({
       {stars.map((star) => {
         const filled = rating >= star;
         const half = !filled && rating >= star - 0.5;
-        return (
-          <Text key={star} style={[styles.star, { fontSize: size }]}>
-            {filled ? "★" : half ? "⭑" : "☆"}
-          </Text>
-        );
+        return <Star key={star} filled={filled} half={half} size={size} />;
       })}
       {showLabel && (
         <Text style={[styles.label, { fontSize: size - 2 }]}>
@@ -41,7 +92,7 @@ const styles = StyleSheet.create({
     gap: 1,
   },
   star: {
-    color: AppColors.star,
+    includeFontPadding: false,
   },
   label: {
     color: AppColors.textSecondary,
