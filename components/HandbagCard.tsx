@@ -1,12 +1,13 @@
-import React from "react";
-import { View, Text, Pressable, StyleSheet, Dimensions } from "react-native";
-import { Image } from "expo-image";
-import { useRouter } from "expo-router";
-import type { Href } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { AppColors, Spacing, Radius, FontSize } from "@/constants/appTheme";
-import { Handbag } from "@/types/handbag";
 import FavoriteButton from "@/components/FavoriteButton";
+import { AppColors, FontSize, Radius, Spacing } from "@/constants/appTheme";
+import { useCustomImages } from "@/context/CustomImagesContext";
+import { Handbag } from "@/types/handbag";
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
+import type { Href } from "expo-router";
+import { useRouter } from "expo-router";
+import React from "react";
+import { Dimensions, Pressable, StyleSheet, Text, View } from "react-native";
 
 interface Props {
   handbag: Handbag;
@@ -16,6 +17,8 @@ const CARD_WIDTH = (Dimensions.get("window").width - Spacing.lg * 3) / 2;
 
 export default function HandbagCard({ handbag }: Props) {
   const router = useRouter();
+  const { getCustomUri } = useCustomImages();
+  const imageUri = getCustomUri(handbag.id) ?? handbag.uri;
   const discounted = handbag.cost * (1 - handbag.percentOff);
   const pctLabel = `${Math.round(handbag.percentOff * 100)}% OFF`;
 
@@ -27,7 +30,7 @@ export default function HandbagCard({ handbag }: Props) {
       {/* Image */}
       <View style={styles.imageWrapper}>
         <Image
-          source={{ uri: handbag.uri }}
+          source={{ uri: imageUri }}
           style={styles.image}
           contentFit="cover"
           transition={300}

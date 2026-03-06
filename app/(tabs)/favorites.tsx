@@ -1,4 +1,5 @@
 import { AppColors, FontSize, Radius, Spacing } from "@/constants/appTheme";
+import { useCustomImages } from "@/context/CustomImagesContext";
 import { useFavorites } from "@/context/FavoritesContext";
 import { Handbag } from "@/types/handbag";
 import { Ionicons } from "@expo/vector-icons";
@@ -34,6 +35,8 @@ function FavoriteRow({
   onPress: () => void;
 }) {
   const swipeRef = useRef<Swipeable>(null);
+  const { getCustomUri } = useCustomImages();
+  const imageUri = getCustomUri(item.id) ?? item.uri;
   const discounted = item.cost * (1 - item.percentOff);
 
   const renderRightActions = (
@@ -77,7 +80,7 @@ function FavoriteRow({
         onPress={onPress}
       >
         <Image
-          source={{ uri: item.uri }}
+          source={{ uri: imageUri }}
           style={styles.img}
           contentFit="cover"
           transition={200}

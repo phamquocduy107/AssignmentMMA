@@ -28,6 +28,13 @@
     "plugins": [
       "expo-router",
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Luxury Bags to access your photos to customize handbag images.",
+          "cameraPermission": "Allow Luxury Bags to use your camera to take a photo for handbag images."
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",

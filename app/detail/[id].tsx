@@ -1,25 +1,28 @@
-import React, { useEffect, useState, useCallback } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  Pressable,
-  ActivityIndicator,
-  SafeAreaView,
-  StatusBar,
-  Dimensions,
-} from "react-native";
-import { Image } from "expo-image";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import FavoriteButton from "@/components/FavoriteButton";
+import RatingBreakdown from "@/components/RatingBreakdown";
+import StarRating from "@/components/StarRating";
+import { AppColors, FontSize, Radius, Spacing } from "@/constants/appTheme";
+import { useCustomImages } from "@/context/CustomImagesContext";
 import { fetchHandbagById } from "@/services/api";
 import { getFeedback } from "@/services/mockFeedback";
-import { Handbag, Feedback } from "@/types/handbag";
-import StarRating from "@/components/StarRating";
-import RatingBreakdown from "@/components/RatingBreakdown";
-import FavoriteButton from "@/components/FavoriteButton";
-import { AppColors, Spacing, FontSize, Radius } from "@/constants/appTheme";
+import { Feedback, Handbag } from "@/types/handbag";
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  Pressable,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
 
@@ -30,6 +33,83 @@ export default function DetailScreen() {
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [customUri, setLocalCustomUri] = useState<string | null>(null);
+  const { getCustomUri, setCustomUri, removeCustomUri } = useCustomImages();
+
+  // Sync local state from context on mount
+  useEffect(() => {
+    setLocalCustomUri(getCustomUri(id));
+  }, [id]);
+
+  const pickImage = useCallback(
+    async (source: "camera" | "library") => {
+      // Request permission first
+      if (source === "camera") {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert(
+            "Cần quyền truy cập",
+            "Vui lòng cấp quyền camera trong Cài đặt để sử dụng tính năng này.",
+            [{ text: "OK" }],
+          );
+          return;
+        }
+      } else {
+        const { status } =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert(
+            "Cần quyền truy cập",
+            "Vui lòng cấp quyền thư viện ảnh trong Cài đặt để sử dụng tính năng này.",
+            [{ text: "OK" }],
+          );
+          return;
+        }
+      }
+
+      const fn =
+        source === "camera"
+          ? ImagePicker.launchCameraAsync
+          : ImagePicker.launchImageLibraryAsync;
+
+      const result = await fn({
+        mediaTypes: ["images"],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]?.uri) {
+        const uri = result.assets[0].uri;
+        setLocalCustomUri(uri);
+        await setCustomUri(id, uri); // update context + AsyncStorage
+      }
+    },
+    [id],
+  );
+
+  const handleImagePress = useCallback(() => {
+    Alert.alert(
+      "Đổi ảnh túi",
+      "Chọn nguồn ảnh",
+      [
+        { text: "Chụp ảnh", onPress: () => pickImage("camera") },
+        { text: "Thư viện ảnh", onPress: () => pickImage("library") },
+        customUri
+          ? {
+              text: "↩ Khôi phục ảnh gốc",
+              style: "destructive",
+              onPress: async () => {
+                setLocalCustomUri(null);
+                await removeCustomUri(id); // update context + AsyncStorage
+              },
+            }
+          : { text: "Hủy", style: "cancel" },
+        ...(customUri ? [{ text: "Hủy", style: "cancel" as const }] : []),
+      ],
+      { cancelable: true },
+    );
+  }, [pickImage, customUri, id]);
 
   useEffect(() => {
     (async () => {
@@ -47,7 +127,7 @@ export default function DetailScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.safe}>
+      <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
         <View style={styles.center}>
           <ActivityIndicator size="large" color={AppColors.accent} />
         </View>
@@ -57,7 +137,7 @@ export default function DetailScreen() {
 
   if (error || !handbag) {
     return (
-      <SafeAreaView style={styles.safe}>
+      <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
         <View style={styles.center}>
           <Text style={{ color: AppColors.textSecondary }}>
             {error ?? "Not found"}
@@ -71,7 +151,7 @@ export default function DetailScreen() {
   const savings = handbag.cost - discounted;
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
       <StatusBar
         barStyle="light-content"
         backgroundColor={AppColors.background}
@@ -101,20 +181,27 @@ export default function DetailScreen() {
         contentContainerStyle={styles.content}
       >
         {/* Hero Image */}
-        <View style={styles.imageBox}>
+        <Pressable style={styles.imageBox} onPress={handleImagePress}>
           <Image
-            source={{ uri: handbag.uri }}
+            source={{ uri: customUri ?? handbag.uri }}
             style={styles.image}
             contentFit="cover"
             transition={400}
           />
-          {/* Off badge */}
+          {/* % Off badge */}
           <View style={styles.offBadge}>
             <Text style={styles.offText}>
               {Math.round(handbag.percentOff * 100)}% OFF
             </Text>
           </View>
-        </View>
+          {/* Camera overlay hint */}
+          <View style={styles.cameraHint}>
+            <Ionicons name="camera" size={18} color={AppColors.white} />
+            <Text style={styles.cameraHintText}>
+              {customUri ? "Đổi ảnh" : "Thêm ảnh"}
+            </Text>
+          </View>
+        </Pressable>
 
         {/* Details Card */}
         <View style={styles.detailCard}>
@@ -323,6 +410,23 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm - 2,
   },
   offText: { color: AppColors.white, fontWeight: "800", fontSize: FontSize.sm },
+  cameraHint: {
+    position: "absolute",
+    bottom: Spacing.xxl,
+    right: Spacing.md,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    backgroundColor: "rgba(0,0,0,0.55)",
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm - 2,
+  },
+  cameraHintText: {
+    color: AppColors.white,
+    fontSize: FontSize.xs,
+    fontWeight: "700",
+  },
   detailCard: {
     backgroundColor: AppColors.surface,
     borderTopLeftRadius: Radius.xl,
