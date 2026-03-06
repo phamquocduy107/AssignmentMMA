@@ -1,19 +1,19 @@
-import React, { useState, useEffect, useMemo } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  FlatList,
-  StyleSheet,
-  SafeAreaView,
-  ActivityIndicator,
-  StatusBar,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import HandbagCard from "@/components/HandbagCard";
+import { AppColors, FontSize, Radius, Spacing } from "@/constants/appTheme";
 import { fetchHandbags } from "@/services/api";
 import { Handbag } from "@/types/handbag";
-import HandbagCard from "@/components/HandbagCard";
-import { AppColors, Spacing, FontSize, Radius } from "@/constants/appTheme";
+import { Ionicons } from "@expo/vector-icons";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 
 export default function SearchScreen() {
   const [all, setAll] = useState<Handbag[]>([]);

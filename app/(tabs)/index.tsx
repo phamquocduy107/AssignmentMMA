@@ -1,19 +1,19 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  SafeAreaView,
-  ActivityIndicator,
-  RefreshControl,
-  StatusBar,
-} from "react-native";
+import BrandFilter from "@/components/BrandFilter";
+import HandbagCard from "@/components/HandbagCard";
+import { AppColors, FontSize, Spacing } from "@/constants/appTheme";
 import { fetchHandbags } from "@/services/api";
 import { Handbag } from "@/types/handbag";
-import HandbagCard from "@/components/HandbagCard";
-import BrandFilter from "@/components/BrandFilter";
-import { AppColors, Spacing, FontSize } from "@/constants/appTheme";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  RefreshControl,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 export default function HomeScreen() {
   const [handbags, setHandbags] = useState<Handbag[]>([]);
