@@ -26,7 +26,6 @@ export default function HomeScreen() {
     try {
       setError(null);
       const data = await fetchHandbags();
-      // Sort descending by cost
       const sorted = [...data].sort((a, b) => b.cost - a.cost);
       setHandbags(sorted);
     } catch (e) {
@@ -72,45 +71,47 @@ export default function HomeScreen() {
       <BrandFilter selected={selectedBrand} onSelect={setSelectedBrand} />
 
       {/* Content */}
-      {loading ? (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={AppColors.accent} />
-          <Text style={styles.loadingText}>Loading luxury bags...</Text>
-        </View>
-      ) : error ? (
-        <View style={styles.center}>
-          <Text style={styles.errorEmoji}>⚠️</Text>
-          <Text style={styles.errorText}>{error}</Text>
-        </View>
-      ) : (
-        <FlatList
-          data={filtered}
-          renderItem={renderItem}
-          keyExtractor={keyExtractor}
-          numColumns={2}
-          columnWrapperStyle={styles.row}
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={() => {
-                setRefreshing(true);
-                loadHandbags();
-              }}
-              tintColor={AppColors.accent}
-            />
-          }
-          ListEmptyComponent={
-            <View style={styles.center}>
-              <Text style={styles.errorEmoji}>🛍</Text>
-              <Text style={styles.errorText}>
-                No bags found for {selectedBrand}
-              </Text>
-            </View>
-          }
-        />
-      )}
+      <View style={styles.contentContainer}>
+        {loading ? (
+          <View style={styles.center}>
+            <ActivityIndicator size="large" color={AppColors.accent} />
+            <Text style={styles.loadingText}>Loading luxury bags...</Text>
+          </View>
+        ) : error ? (
+          <View style={styles.center}>
+            <Text style={styles.errorEmoji}>⚠️</Text>
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={filtered}
+            renderItem={renderItem}
+            keyExtractor={keyExtractor}
+            numColumns={2}
+            columnWrapperStyle={styles.row}
+            contentContainerStyle={styles.list}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={() => {
+                  setRefreshing(true);
+                  loadHandbags();
+                }}
+                tintColor={AppColors.accent}
+              />
+            }
+            ListEmptyComponent={
+              <View style={styles.center}>
+                <Text style={styles.errorEmoji}>🛍</Text>
+                <Text style={styles.errorText}>
+                  No bags found for {selectedBrand}
+                </Text>
+              </View>
+            }
+          />
+        )}
+      </View>
     </SafeAreaView>
   );
 }
@@ -163,5 +164,8 @@ const styles = StyleSheet.create({
     color: AppColors.textSecondary,
     fontSize: FontSize.md,
     textAlign: "center",
+  },
+  contentContainer: {
+    flex: 100,
   },
 });

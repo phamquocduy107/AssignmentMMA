@@ -97,11 +97,11 @@ export default function DetailScreen() {
         { text: "Thư viện ảnh", onPress: () => pickImage("library") },
         customUri
           ? {
-              text: "↩ Khôi phục ảnh gốc",
+              text: "Khôi phục ảnh gốc",
               style: "destructive",
               onPress: async () => {
                 setLocalCustomUri(null);
-                await removeCustomUri(id); // update context + AsyncStorage
+                await removeCustomUri(id);
               },
             }
           : { text: "Hủy", style: "cancel" },
